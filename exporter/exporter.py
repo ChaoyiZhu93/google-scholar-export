@@ -19,27 +19,44 @@ from urllib.parse import quote
 from datetime import date
 
 
-PAPER_TEMPLATE = """
-<div class="card">
-    <div class="card-publication">
-        <div class="card-body card-body-left">
-            <h4><a href="{url}">{title}</a></h4>
-            <p style="font-style: italic;">by {authors}</p>
-            <p><b>{journal}</b></p>
-        </div>
-    </div>
-    <div class="card-footer">
-        <small class="text-muted">Published in <b>{year}</b> | 
-        <a href="{citations_url}">Citations: <b>{n_citations}</b></a></small>
-    </div>
-</div>
+# PAPER_TEMPLATE = """
+# <div class="card">
+#     <div class="card-publication">
+#         <div class="card-body card-body-left">
+#             <h4><a href="{url}">{title}</a></h4>
+#             <p style="font-style: italic;">by {authors}</p>
+#             <p><b>{journal}</b></p>
+#         </div>
+#     </div>
+#     <div class="card-footer">
+#         <small class="text-muted">Published in <b>{year}</b> | 
+#         <a href="{citations_url}">Citations: <b>{n_citations}</b></a></small>
+#     </div>
+# </div>
+# """
+
+# INTRO_TEXT = """
+# <p>Publications (<b>{total}</b>) last scraped for <a href="{url}">{scholar}</a> on <b>{date}</b> 
+# using <a href="https://github.com/TWRogers/google-scholar-export">google-scholar-export</a>.</p>
+# """
+PAPER_TEMPLATE="""
+{authors}, {year}, [{title}]({url}), ***{journal}***, [{n_citations} citations]({citations_url})
+
 """
 
-INTRO_TEXT = """
-<p>Publications (<b>{total}</b>) last scraped for <a href="{url}">{scholar}</a> on <b>{date}</b> 
-using <a href="https://github.com/TWRogers/google-scholar-export">google-scholar-export</a>.</p>
-"""
+INTRO_TEXT="""---
+layout: archive
+title: "Publications"
+permalink: /publications/
+author_profile: true
+---
 
+{str}
+
+Number of publications = {total} last scraped from my [GoogleScholar page]({url}) on {date}
+
+
+"""
 
 class ScholarExporter(object):
 
@@ -53,7 +70,7 @@ class ScholarExporter(object):
     def from_user(cls,
                   user: str,
                   page_size: int = 1000,
-                  sort_by: str = 'citations'):  # sort_by='pubdate'
+                  sort_by: str = 'pubdate'):  # sort_by='pubdate'
 
         url = 'https://scholar.google.co.uk/citations?' \
               'user={}' \
@@ -75,6 +92,7 @@ class ScholarExporter(object):
             html_file.write(INTRO_TEXT.format(scholar=self.scholar,
                                               total=len(self.parsed_papers),
                                               url=self.url,
+                                              str="{% include base_path %}",
                                               date=date.today().isoformat()))
 
             for paper in self.parsed_papers:
